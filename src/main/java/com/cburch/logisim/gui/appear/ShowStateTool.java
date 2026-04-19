@@ -12,9 +12,9 @@ package com.cburch.logisim.gui.appear;
 import com.cburch.draw.toolbar.ToolbarClickableItem;
 import com.cburch.draw.tools.DrawingAttributeSet;
 import com.cburch.logisim.gui.icons.ShowStateIcon;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import javax.swing.Icon;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class ShowStateTool implements ToolbarClickableItem {
 
@@ -45,7 +45,13 @@ public class ShowStateTool implements ToolbarClickableItem {
   public boolean isSelectable() {
     return false;
   }
-
+  
+  @Override
+  public Icon getIcon()
+  {
+    return null;
+  }
+  
   @Override
   public void clicked() {
     final var w = new ShowStateDialog(view.getFrame(), canvas);
@@ -54,7 +60,13 @@ public class ShowStateTool implements ToolbarClickableItem {
     w.setLocation(p);
     w.setVisible(true);
   }
-
+  
+  @Override
+  public void doAction()
+  {
+    
+  }
+  
   @Override
   public void paintIcon(java.awt.Component destination, Graphics gfx) {
     icon.paintIcon(destination, gfx, 4, 4);

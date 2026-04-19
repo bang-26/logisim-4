@@ -23,10 +23,8 @@ import com.cburch.logisim.proj.ProjectEvent;
 import com.cburch.logisim.proj.ProjectListener;
 import com.cburch.logisim.tools.Tool;
 import com.cburch.logisim.util.InputEventUtil;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
+
+import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -40,11 +38,13 @@ class LayoutToolbarModel extends AbstractToolbarModel {
   private final MyListener myListener;
   private List<ToolbarItem> items;
   private Tool haloedTool;
+  private final AiToolbarItem aiToolbarItem;
 
   public LayoutToolbarModel(Frame frame, Project proj) {
     this.frame = frame;
     this.proj = proj;
     myListener = new MyListener();
+    aiToolbarItem = new AiToolbarItem(frame);
     items = Collections.emptyList();
     haloedTool = null;
     buildContents();
@@ -80,6 +80,10 @@ class LayoutToolbarModel extends AbstractToolbarModel {
         newItems.add(Objects.requireNonNullElseGet(i, () -> new ToolItem(tool)));
       }
     }
+    
+    newItems.add(new ToolbarSeparator(4));
+    newItems.add(aiToolbarItem);
+    
     items = Collections.unmodifiableList(newItems);
     fireToolbarContentsChanged();
   }

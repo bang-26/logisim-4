@@ -9,18 +9,14 @@
 
 package com.cburch.logisim.gui.appear;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-
-import javax.swing.Icon;
-import javax.swing.JOptionPane;
-
 import com.cburch.draw.canvas.Canvas;
 import com.cburch.draw.toolbar.ToolbarClickableItem;
 import com.cburch.logisim.gui.generic.OptionPane;
 import com.cburch.logisim.gui.icons.ArithmeticIcon;
 import com.cburch.logisim.gui.icons.CircuitIcon;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class ResetAppearanceTool implements ToolbarClickableItem {
 
@@ -54,7 +50,13 @@ public class ResetAppearanceTool implements ToolbarClickableItem {
   public void paintIcon(Component destination, Graphics gfx) {
     icon.paintIcon(destination, gfx, 4, 4);
   }
-
+  
+  @Override
+  public Icon getIcon()
+  {
+    return null;
+  }
+  
   @Override
   public void clicked() {
     if (canvas == null || canvas.getCircuit() == null) return;
@@ -70,7 +72,13 @@ public class ResetAppearanceTool implements ToolbarClickableItem {
       canvas.repaint(canvas.getBounds(null));
     }
   }
-
+  
+  @Override
+  public void doAction()
+  {
+    
+  }
+  
   @Override
   public void paintPressedIcon(Component destination, Graphics gfx) {
     icon.paintIcon(destination, gfx, 4, 4);

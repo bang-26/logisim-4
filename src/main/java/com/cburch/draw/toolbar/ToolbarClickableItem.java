@@ -9,12 +9,17 @@
 
 package com.cburch.draw.toolbar;
 
+import javax.swing.*;
 import java.awt.Component;
 import java.awt.Graphics;
 
 public interface ToolbarClickableItem extends ToolbarItem {
-
-  void clicked();
-
-  void paintPressedIcon(Component destination, Graphics gfx);
+    
+    Icon getIcon();
+    
+    void clicked();
+    
+    void doAction();
+    
+    void paintPressedIcon(Component destination, Graphics gfx);
 }

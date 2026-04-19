@@ -9,10 +9,9 @@
 
 package com.cburch.logisim.gui.main;
 
-import static com.cburch.logisim.gui.Strings.S;
-
 import com.cburch.draw.toolbar.Toolbar;
 import com.cburch.logisim.Main;
+import com.cburch.logisim.ai.ui.AiPanel;
 import com.cburch.logisim.circuit.Circuit;
 import com.cburch.logisim.circuit.CircuitEvent;
 import com.cburch.logisim.circuit.CircuitListener;
@@ -21,9 +20,9 @@ import com.cburch.logisim.comp.Component;
 import com.cburch.logisim.data.AttributeEvent;
 import com.cburch.logisim.data.AttributeSet;
 import com.cburch.logisim.data.Direction;
-import com.cburch.logisim.file.Loader;
 import com.cburch.logisim.file.LibraryEvent;
 import com.cburch.logisim.file.LibraryListener;
+import com.cburch.logisim.file.Loader;
 import com.cburch.logisim.generated.BuildInfo;
 import com.cburch.logisim.gui.appear.AppearanceView;
 import com.cburch.logisim.gui.generic.AttrTable;
@@ -53,14 +52,11 @@ import com.cburch.logisim.vhdl.base.HdlModel;
 import com.cburch.logisim.vhdl.gui.HdlContentView;
 import com.cburch.logisim.vhdl.gui.VhdlSimState;
 import com.cburch.logisim.vhdl.gui.VhdlSimulatorConsole;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Font;
-import java.awt.GraphicsEnvironment;
-import java.awt.IllegalComponentStateException;
-import java.awt.Point;
-import java.awt.Rectangle;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
@@ -79,13 +75,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.Timer;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
-import javax.swing.WindowConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+
+import static com.cburch.logisim.gui.Strings.S;
 
 public class Frame extends LFrame.MainWindow implements LocaleListener {
   private static final long serialVersionUID = 1L;
@@ -106,6 +97,7 @@ public class Frame extends LFrame.MainWindow implements LocaleListener {
   private final HorizontalSplitPane editRegion;
   private final MainRegionVerticalSplitPane mainRegion;
   private final JPanel rightPanel;
+  private final JSplitPane aiSplitPane;
   private final JPanel mainPanelSuper;
   private final CardPanel mainPanel;
   // left-side elements
@@ -115,6 +107,8 @@ public class Frame extends LFrame.MainWindow implements LocaleListener {
   private final SimulationExplorer simExplorer;
   private final AttrTable attrTable;
   private final ZoomControl zoom;
+  private final AiPanel aiPanel;
+  private boolean aiPanelVisible;
   // for the Layout view
   private final LayoutToolbarModel layoutToolbarModel;
   private final Canvas layoutCanvas;
@@ -165,6 +159,7 @@ public class Frame extends LFrame.MainWindow implements LocaleListener {
     toolbox = new Toolbox(project, this, menuListener);
     simExplorer = new SimulationExplorer(project, menuListener);
     bottomTab = new JTabbedPane();
+
     var fontName = "Dialog";
     final var appFont = AppPreferences.APP_FONT.get();
     if (appFont != null && !appFont.isBlank()) {
@@ -179,12 +174,16 @@ public class Frame extends LFrame.MainWindow implements LocaleListener {
 
     zoom = new ZoomControl(layoutZoomModel, layoutCanvas);
 
+    aiPanel = new AiPanel();
+    aiPanelVisible = false;
+
     // set up the central area
     mainPanelSuper = new JPanel(new BorderLayout());
     canvasPane.setZoomModel(layoutZoomModel);
     mainPanel = new CardPanel();
     mainPanel.addView(EDIT_LAYOUT, canvasPane);
     mainPanel.setView(EDIT_LAYOUT);
+    mainPanelSuper.add(toolbar, BorderLayout.NORTH);
     mainPanelSuper.add(mainPanel, BorderLayout.CENTER);
 
     // set up the contents, split down the middle, with the canvas
@@ -214,8 +213,15 @@ public class Frame extends LFrame.MainWindow implements LocaleListener {
     editRegion = new HorizontalSplitPane(mainPanelSuper, hdlEditor, 1.0);
     rightRegion = new HorizontalSplitPane(editRegion, vhdlSimulatorConsole, 1.0);
 
+    aiSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, rightRegion, aiPanel);
+    aiSplitPane.setResizeWeight(1.0);
+    aiSplitPane.setDividerLocation(0.75);
+    aiSplitPane.setOneTouchExpandable(true);
+    aiSplitPane.setContinuousLayout(true);
+    
     rightPanel = new JPanel(new BorderLayout());
-    rightPanel.add(rightRegion, BorderLayout.CENTER);
+    rightPanel.add(aiSplitPane, BorderLayout.CENTER);
+    aiPanel.setVisible(false);
 
     final var state = new VhdlSimState(project);
     state.stateChanged();
@@ -670,6 +676,21 @@ public class Frame extends LFrame.MainWindow implements LocaleListener {
 
   public ZoomModel getZoomModel() {
     return layoutZoomModel;
+  }
+
+  public void toggleAiPanel() {
+    aiPanelVisible = !aiPanelVisible;
+    aiPanel.setVisible(aiPanelVisible);
+    
+    if (aiPanelVisible) {
+      aiPanel.requestFocusInWindow();
+      aiSplitPane.setDividerLocation(0.75);
+    } else {
+      aiSplitPane.setDividerLocation(1.0);
+    }
+    
+    rightPanel.revalidate();
+    rightPanel.repaint();
   }
 
   @Override

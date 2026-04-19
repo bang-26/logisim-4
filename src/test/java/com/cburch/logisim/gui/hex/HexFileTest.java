@@ -115,7 +115,7 @@ public class HexFileTest {
 
     compare(true, desc, tempFile, addressSize, wordSize, values);
 
-    if (desc.startsWith("Binary")) {
+    if (desc.startsWith("Binary") && isXxdAvailable()) {
       final var endian = desc.endsWith("big-endian") ? "big-endian" : "little-endian";
 
       final var otherFile = new File(tempFile + ".xxd");
@@ -128,6 +128,16 @@ public class HexFileTest {
       final String[] cmd2 = {"xxd", "-p", tempFile.toString(), plainFile.toString()};
       Runtime.getRuntime().exec(cmd2).waitFor();
       compare(false, "v3.0 hex bytes plain " + endian, plainFile, addressSize, wordSize, values);
+    }
+  }
+
+  private static boolean isXxdAvailable() {
+    try {
+      final Process process = Runtime.getRuntime().exec(new String[]{"xxd", "-v"});
+      process.waitFor();
+      return process.exitValue() == 0;
+    } catch (Exception e) {
+      return false;
     }
   }
 }
