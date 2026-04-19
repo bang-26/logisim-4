@@ -1,22 +1,8 @@
 package com.cburch.logisim.gui.icons;
 
-/**
- * **************************************************************************************************
- * ProjectName   ：  logisim-4
- * Package       ：  com.cburch.logisim.gui.icons
- * ClassName     ：  AIIcon
- * CreateTime    ：  2026-04-19 16:11
- * Author        ：  Issac_Al
- * Email         ：  IssacAl@qq.com
- * IDE           ：  IntelliJ IDEA 2020.3.4
- * Version       ：  1.0
- * CodedFormat   ：  utf-8
- * Description   ：  Java Class
- * **************************************************************************************************
- */
-
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.RoundRectangle2D;
 
 public class AIIcon implements Icon
 {
@@ -27,26 +13,51 @@ public class AIIcon implements Icon
     {
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
         
-        int size = Math.min(getIconWidth(), getIconHeight());
-        int offset = (size - SIZE) / 2;
+        int iconSize = getIconWidth();
+        int padding = (iconSize - SIZE) / 2;
         
-        g2d.translate(x + offset, y + offset);
+        g2d.translate(x + padding, y + padding);
         
         GradientPaint gradient = new GradientPaint(
-            0, 0, new Color(100, 150, 255),
-            SIZE, SIZE, new Color(150, 100, 255));
+            0, 0, new Color(66, 133, 244),
+            SIZE, SIZE, new Color(52, 168, 83));
         g2d.setPaint(gradient);
         
-        g2d.fillRoundRect(2, 2, SIZE - 4, SIZE - 4, 8, 8);
+        RoundRectangle2D roundedRect = new RoundRectangle2D.Double(1, 1, SIZE - 2, SIZE - 2, 8, 8);
+        g2d.fill(roundedRect);
         
         g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Arial", Font.BOLD, 12));
-        FontMetrics fm = g2d.getFontMetrics();
-        String text = "AI";
-        int textX = (SIZE - fm.stringWidth(text)) / 2;
-        int textY = (SIZE + fm.getAscent() - fm.getDescent()) / 2;
-        g2d.drawString(text, textX, textY);
+        g2d.setStroke(new BasicStroke(2.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        
+        int centerX = SIZE / 2;
+        int centerY = SIZE / 2 - 2;
+        int headRadius = 7;
+        
+        g2d.drawOval(centerX - headRadius, centerY - headRadius, headRadius * 2, headRadius * 2);
+        
+        g2d.setStroke(new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        
+        int eyeOffset = 3;
+        int eyeY = centerY - 1;
+        int eyeSize = 2;
+        g2d.fillOval(centerX - eyeOffset - eyeSize/2, eyeY - eyeSize/2, eyeSize, eyeSize);
+        g2d.fillOval(centerX + eyeOffset - eyeSize/2, eyeY - eyeSize/2, eyeSize, eyeSize);
+        
+        g2d.drawArc(centerX - 3, centerY + 1, 6, 4, 0, -180);
+        
+        g2d.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        int antennaHeight = 3;
+        g2d.drawLine(centerX, centerY - headRadius, centerX, centerY - headRadius - antennaHeight);
+        g2d.fillOval(centerX - 1, centerY - headRadius - antennaHeight - 2, 3, 3);
+        
+        int bodyY = centerY + headRadius - 2;
+        int bodyWidth = 12;
+        int bodyHeight = 6;
+        RoundRectangle2D body = new RoundRectangle2D.Double(
+            centerX - bodyWidth/2, bodyY, bodyWidth, bodyHeight, 3, 3);
+        g2d.fill(body);
         
         g2d.dispose();
     }

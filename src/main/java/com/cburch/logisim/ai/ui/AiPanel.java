@@ -11,6 +11,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.InputMethodEvent;
 import java.awt.event.InputMethodListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -52,6 +54,7 @@ public class AiPanel extends JPanel
     private void initializeUI()
     {
         setLayout(new BorderLayout());
+        setBackground(Color.WHITE);
         
         JPanel headerPanel = createHeaderPanel();
         add(headerPanel, BorderLayout.NORTH);
@@ -60,9 +63,13 @@ public class AiPanel extends JPanel
         messageList = new JList<>(messageListModel);
         messageList.setCellRenderer(new MessageCellRenderer());
         messageList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        messageList.setBackground(new Color(250, 250, 250));
+        messageList.setFixedCellWidth(-1);
+        messageList.setFixedCellHeight(-1);
         
         JScrollPane scrollPane = new JScrollPane(messageList);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
         add(scrollPane, BorderLayout.CENTER);
         
         JPanel inputPanel = createInputPanel();
@@ -72,15 +79,16 @@ public class AiPanel extends JPanel
     private JPanel createHeaderPanel()
     {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY),
-            BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+        panel.setBackground(new Color(66, 133, 244));
+        panel.setBorder(BorderFactory.createEmptyBorder(12, 15, 12, 15));
         
-        JLabel titleLabel = new JLabel("AI 助手");
-        titleLabel.setFont(new Font("Microsoft YaHei", Font.BOLD, 16));
+        JLabel titleLabel = new JLabel(createRobotIcon(), SwingConstants.LEFT);
+        titleLabel.setText(" AI 助手");
+        titleLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
+        titleLabel.setFont(createMixedFont(Font.BOLD, 18));
+        titleLabel.setForeground(Color.WHITE);
         
-        settingsButton = new JButton("⚙");
-        settingsButton.setToolTipText("AI 设置");
+        settingsButton = createStyledIconButton(getSettingsIconString(), "AI 设置", new Color(255, 255, 255, 50));
         settingsButton.addActionListener(e -> openSettingsDialog());
         
         panel.add(titleLabel, BorderLayout.WEST);
@@ -89,16 +97,85 @@ public class AiPanel extends JPanel
         return panel;
     }
     
+    private Icon createRobotIcon()
+    {
+        return new Icon() {
+            @Override
+            public void paintIcon(Component c, Graphics g, int x, int y) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                g2d.setColor(Color.WHITE);
+                g2d.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                
+                int centerX = x + 12;
+                int centerY = y + 12;
+                
+                int headRadius = 6;
+                g2d.drawOval(centerX - headRadius, centerY - headRadius - 2, headRadius * 2, headRadius * 2);
+                
+                int eyeOffset = 3;
+                int eyeY = centerY - 2;
+                int eyeSize = 2;
+                g2d.fillOval(centerX - eyeOffset - eyeSize/2, eyeY - eyeSize/2, eyeSize, eyeSize);
+                g2d.fillOval(centerX + eyeOffset - eyeSize/2, eyeY - eyeSize/2, eyeSize, eyeSize);
+                
+                g2d.drawArc(centerX - 2, centerY, 4, 3, 0, -180);
+                
+                g2d.setStroke(new BasicStroke(1.2f));
+                g2d.drawLine(centerX, centerY - headRadius - 2, centerX, centerY - headRadius - 4);
+                g2d.fillOval(centerX - 1, centerY - headRadius - 6, 2, 2);
+                
+                g2d.dispose();
+            }
+            
+            @Override
+            public int getIconWidth() {
+                return 24;
+            }
+            
+            @Override
+            public int getIconHeight() {
+                return 24;
+            }
+        };
+    }
+    
+    private String getSettingsIconString()
+    {
+        return "\u2699";
+    }
+    
     private JPanel createInputPanel()
     {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(230, 230, 230)),
+            BorderFactory.createEmptyBorder(12, 12, 12, 12)));
         
         inputArea = new JTextArea(3, 20);
         inputArea.setLineWrap(true);
         inputArea.setWrapStyleWord(true);
-        inputArea.setFont(new Font("Microsoft YaHei", Font.PLAIN, 13));
+        inputArea.setFont(createMixedFont(Font.PLAIN, 14));
         inputArea.enableInputMethods(true);
+        inputArea.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
+            BorderFactory.createEmptyBorder(8, 10, 8, 10)));
+        inputArea.setBackground(new Color(250, 250, 250));
+        
+        inputArea.addKeyListener(new KeyAdapter()
+        {
+            @Override
+            public void keyPressed(KeyEvent e)
+            {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER && !e.isShiftDown())
+                {
+                    e.consume();
+                    sendMessage();
+                }
+            }
+        });
         
         inputArea.addInputMethodListener(new InputMethodListener()
         {
@@ -119,19 +196,22 @@ public class AiPanel extends JPanel
         
         JScrollPane inputScroll = new JScrollPane(inputArea);
         inputScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        inputScroll.setBorder(BorderFactory.createEmptyBorder());
         
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+        buttonPanel.setBackground(Color.WHITE);
         
-        attachFileButton = createIconButton("📎", "附加文件");
+        attachFileButton = createStyledIconButton("📎", "附加文件", new Color(66, 133, 244, 20));
         attachFileButton.addActionListener(e -> attachFiles());
         
-        attachImageButton = createIconButton("🖼", "附加图片");
+        attachImageButton = createStyledIconButton("🖼", "附加图片", new Color(52, 168, 83, 20));
         attachImageButton.addActionListener(e -> attachImages());
         
-        clearChatButton = createIconButton("🗑", "清空对话");
+        clearChatButton = createStyledIconButton("🗑", "清空对话", new Color(234, 67, 53, 20));
         clearChatButton.addActionListener(e -> clearChat());
         
-        sendButton = createIconButton("➤", "发送给 AI");
+        sendButton = createStyledIconButton("➤", "发送给 AI (Enter)", new Color(66, 133, 244));
+        sendButton.setForeground(Color.WHITE);
         sendButton.addActionListener(e -> sendMessage());
         
         buttonPanel.add(attachFileButton);
@@ -146,13 +226,79 @@ public class AiPanel extends JPanel
         return panel;
     }
     
-    private JButton createIconButton(String icon, String tooltip)
+    private Font createMixedFont(int style, int size)
+    {
+        String chineseFont = "Microsoft YaHei";
+        String englishFont = "Monaco";
+        
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        String[] availableFonts = ge.getAvailableFontFamilyNames();
+        
+        boolean hasChinese = false;
+        boolean hasMonaco = false;
+        
+        for (String font : availableFonts)
+        {
+            if (font.equals(chineseFont))
+            {
+                hasChinese = true;
+            }
+            if (font.equals(englishFont))
+            {
+                hasMonaco = true;
+            }
+        }
+        
+        if (hasMonaco && hasChinese)
+        {
+            return new Font(chineseFont, style, size);
+        } else if (hasChinese)
+        {
+            return new Font(chineseFont, style, size);
+        } else if (hasMonaco)
+        {
+            return new Font(englishFont, style, size);
+        } else
+        {
+            return new Font(Font.SANS_SERIF, style, size);
+        }
+    }
+    
+    private JButton createStyledIconButton(String icon, String tooltip, Color backgroundColor)
     {
         JButton button = new JButton(icon);
         button.setToolTipText(tooltip);
-        button.setPreferredSize(new Dimension(35, 35));
+        button.setPreferredSize(new Dimension(40, 40));
         button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(true);
+        button.setBackground(backgroundColor);
+        button.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 18));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter()
+        {
+            public void mouseEntered(java.awt.event.MouseEvent evt)
+            {
+                button.setBackground(darkenColor(backgroundColor, 0.9f));
+            }
+            
+            public void mouseExited(java.awt.event.MouseEvent evt)
+            {
+                button.setBackground(backgroundColor);
+            }
+        });
+        
         return button;
+    }
+    
+    private Color darkenColor(Color color, float factor)
+    {
+        int r = Math.max(0, (int)(color.getRed() * factor));
+        int g = Math.max(0, (int)(color.getGreen() * factor));
+        int b = Math.max(0, (int)(color.getBlue() * factor));
+        int a = color.getAlpha();
+        return new Color(r, g, b, a);
     }
     
     private void addWelcomeMessage()
@@ -204,7 +350,7 @@ public class AiPanel extends JPanel
         pendingImages.clear();
         
         sendButton.setEnabled(false);
-        sendButton.setText("⏳");
+        sendButton.setText("\u23F3");
         
         ChatMessage loadingMsg = new ChatMessage(ChatMessage.Role.ASSISTANT, "思考中...");
         loadingMsg.setRendering(true);
@@ -242,7 +388,7 @@ public class AiPanel extends JPanel
                         messageList.revalidate();
                         
                         sendButton.setEnabled(true);
-                        sendButton.setText("➤");
+                        sendButton.setText("\u27A4");
                         
                         scrollToBottom();
                         
@@ -291,7 +437,7 @@ public class AiPanel extends JPanel
                     messageList.revalidate();
                     
                     sendButton.setEnabled(true);
-                    sendButton.setText("➤");
+                    sendButton.setText("\u27A4");
                     
                     scrollToBottom();
                 });
@@ -409,11 +555,11 @@ public class AiPanel extends JPanel
                                                       boolean cellHasFocus)
         {
             JPanel panel = new JPanel(new BorderLayout());
-            panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            panel.setBorder(BorderFactory.createEmptyBorder(12, 15, 12, 15));
             
             if (message.getRole() == ChatMessage.Role.USER)
             {
-                panel.setBackground(new Color(220, 240, 255));
+                panel.setBackground(new Color(232, 245, 255));
             } else
             {
                 panel.setBackground(Color.WHITE);
@@ -421,13 +567,19 @@ public class AiPanel extends JPanel
             
             JPanel headerPanel = new JPanel(new BorderLayout());
             headerPanel.setOpaque(false);
+            headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
             
-            JLabel roleLabel = new JLabel(message.getRole() == ChatMessage.Role.USER ? "你" : "AI");
-            roleLabel.setFont(new Font("Microsoft YaHei", Font.BOLD, 12));
+            JLabel roleLabel = new JLabel(message.getRole() == ChatMessage.Role.USER ? 
+                createUserIcon() : createAssistantIcon(), SwingConstants.LEFT);
+            roleLabel.setText(message.getRole() == ChatMessage.Role.USER ? " 你" : " AI");
+            roleLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
+            roleLabel.setFont(createMixedFont(Font.BOLD, 13));
+            roleLabel.setForeground(message.getRole() == ChatMessage.Role.USER ? 
+                new Color(66, 133, 244) : new Color(52, 168, 83));
             
             JLabel timeLabel = new JLabel(message.getFormattedTime());
-            timeLabel.setFont(new Font("Microsoft YaHei", Font.PLAIN, 10));
-            timeLabel.setForeground(Color.GRAY);
+            timeLabel.setFont(createMixedFont(Font.PLAIN, 11));
+            timeLabel.setForeground(new Color(140, 140, 140));
             
             headerPanel.add(roleLabel, BorderLayout.WEST);
             headerPanel.add(timeLabel, BorderLayout.EAST);
@@ -436,10 +588,17 @@ public class AiPanel extends JPanel
             
             if (message.isRendering())
             {
-                JLabel loadingLabel = new JLabel(message.getContent());
-                loadingLabel.setFont(new Font("Microsoft YaHei", Font.ITALIC, 12));
-                loadingLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
-                panel.add(loadingLabel, BorderLayout.CENTER);
+                JPanel loadingPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                loadingPanel.setOpaque(false);
+                
+                JLabel loadingLabel = new JLabel(createThinkingIcon(), SwingConstants.LEFT);
+                loadingLabel.setText(" " + message.getContent());
+                loadingLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
+                loadingLabel.setFont(createMixedFont(Font.ITALIC, 13));
+                loadingLabel.setForeground(new Color(100, 100, 100));
+                loadingPanel.add(loadingLabel);
+                
+                panel.add(loadingPanel, BorderLayout.CENTER);
             } else
             {
                 String content = message.getContent();
@@ -451,25 +610,36 @@ public class AiPanel extends JPanel
                         contentComponent.setOpaque(false);
                         if (contentComponent.getParent() != null)
                         {
-                            ((Container)contentComponent.getParent()).remove(contentComponent);
+                            Container parent = (Container)contentComponent.getParent();
+                            if (parent != null) {
+                                parent.remove(contentComponent);
+                            }
                         }
                         panel.add(contentComponent, BorderLayout.CENTER);
                     } catch (Exception e)
                     {
                         System.err.println("渲染Markdown失败: " + e.getMessage());
+                        e.printStackTrace();
                         JTextArea fallbackText = new JTextArea(content);
                         fallbackText.setEditable(false);
                         fallbackText.setWrapStyleWord(true);
                         fallbackText.setLineWrap(true);
                         fallbackText.setOpaque(false);
-                        fallbackText.setFont(new Font("Microsoft YaHei", Font.PLAIN, 13));
+                        fallbackText.setFont(createMixedFont(Font.PLAIN, 13));
                         fallbackText.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
-                        panel.add(fallbackText, BorderLayout.CENTER);
+                        fallbackText.setBackground(panel.getBackground());
+                        
+                        JScrollPane scrollPane = new JScrollPane(fallbackText);
+                        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+                        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+                        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+                        
+                        panel.add(scrollPane, BorderLayout.CENTER);
                     }
                 } else
                 {
                     JLabel emptyLabel = new JLabel("(无内容)");
-                    emptyLabel.setFont(new Font("Microsoft YaHei", Font.ITALIC, 12));
+                    emptyLabel.setFont(createMixedFont(Font.ITALIC, 12));
                     emptyLabel.setForeground(Color.GRAY);
                     panel.add(emptyLabel, BorderLayout.CENTER);
                 }
@@ -477,13 +647,17 @@ public class AiPanel extends JPanel
             
             if (message.hasAttachments())
             {
-                JPanel attachmentPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                JPanel attachmentPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 5));
                 attachmentPanel.setOpaque(false);
+                attachmentPanel.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
                 
                 for (File file : message.getAttachedFiles())
                 {
-                    JLabel fileLabel = new JLabel("📄 " + file.getName());
-                    fileLabel.setFont(new Font("Microsoft YaHei", Font.PLAIN, 11));
+                    JLabel fileLabel = new JLabel(createFileIcon(), SwingConstants.LEFT);
+                    fileLabel.setText(" " + file.getName());
+                    fileLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
+                    fileLabel.setFont(createMixedFont(Font.PLAIN, 12));
+                    fileLabel.setForeground(new Color(66, 133, 244));
                     attachmentPanel.add(fileLabel);
                 }
                 
@@ -491,6 +665,124 @@ public class AiPanel extends JPanel
             }
             
             return panel;
+        }
+        
+        private Icon createUserIcon()
+        {
+            return new Icon() {
+                @Override
+                public void paintIcon(Component c, Graphics g, int x, int y) {
+                    Graphics2D g2d = (Graphics2D) g.create();
+                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2d.setColor(new Color(66, 133, 244));
+                    
+                    int centerX = x + 8;
+                    int centerY = y + 8;
+                    
+                    g2d.fillOval(centerX - 4, centerY - 6, 8, 8);
+                    
+                    int[] xPoints = {centerX - 6, centerX + 6, centerX + 6, centerX - 6};
+                    int[] yPoints = {centerY + 6, centerY + 6, centerY + 2, centerY + 2};
+                    g2d.fillPolygon(xPoints, yPoints, 4);
+                    
+                    g2d.dispose();
+                }
+                
+                @Override
+                public int getIconWidth() { return 16; }
+                
+                @Override
+                public int getIconHeight() { return 16; }
+            };
+        }
+        
+        private Icon createAssistantIcon()
+        {
+            return new Icon() {
+                @Override
+                public void paintIcon(Component c, Graphics g, int x, int y) {
+                    Graphics2D g2d = (Graphics2D) g.create();
+                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2d.setColor(new Color(52, 168, 83));
+                    g2d.setStroke(new BasicStroke(1.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                    
+                    int centerX = x + 8;
+                    int centerY = y + 8;
+                    
+                    g2d.drawOval(centerX - 5, centerY - 5, 10, 10);
+                    
+                    int eyeOffset = 2;
+                    int eyeY = centerY - 1;
+                    g2d.fillOval(centerX - eyeOffset - 1, eyeY - 1, 2, 2);
+                    g2d.fillOval(centerX + eyeOffset - 1, eyeY - 1, 2, 2);
+                    
+                    g2d.drawArc(centerX - 2, centerY + 1, 4, 3, 0, -180);
+                    
+                    g2d.dispose();
+                }
+                
+                @Override
+                public int getIconWidth() { return 16; }
+                
+                @Override
+                public int getIconHeight() { return 16; }
+            };
+        }
+        
+        private Icon createThinkingIcon()
+        {
+            return new Icon() {
+                @Override
+                public void paintIcon(Component c, Graphics g, int x, int y) {
+                    Graphics2D g2d = (Graphics2D) g.create();
+                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2d.setColor(new Color(100, 100, 100));
+                    
+                    int centerX = x + 8;
+                    int centerY = y + 8;
+                    
+                    g2d.setFont(new Font("Microsoft YaHei", Font.ITALIC, 12));
+                    g2d.drawString("\u2601", centerX - 6, centerY + 4);
+                    
+                    g2d.dispose();
+                }
+                
+                @Override
+                public int getIconWidth() { return 16; }
+                
+                @Override
+                public int getIconHeight() { return 16; }
+            };
+        }
+        
+        private Icon createFileIcon()
+        {
+            return new Icon() {
+                @Override
+                public void paintIcon(Component c, Graphics g, int x, int y) {
+                    Graphics2D g2d = (Graphics2D) g.create();
+                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2d.setColor(new Color(66, 133, 244));
+                    g2d.setStroke(new BasicStroke(1.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                    
+                    int[] xPoints = {x + 3, x + 9, x + 13, x + 13, x + 3};
+                    int[] yPoints = {y + 2, y + 2, y + 6, y + 14, y + 14};
+                    g2d.drawPolygon(xPoints, yPoints, 5);
+                    g2d.drawLine(x + 9, y + 2, x + 9, y + 6);
+                    g2d.drawLine(x + 9, y + 6, x + 13, y + 6);
+                    
+                    g2d.drawLine(x + 6, y + 9, x + 10, y + 9);
+                    g2d.drawLine(x + 6, y + 11, x + 10, y + 11);
+                    
+                    g2d.dispose();
+                }
+                
+                @Override
+                public int getIconWidth() { return 16; }
+                
+                @Override
+                public int getIconHeight() { return 16; }
+            };
         }
     }
 }

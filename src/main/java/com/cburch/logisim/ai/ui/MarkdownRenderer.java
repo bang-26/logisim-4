@@ -54,7 +54,7 @@ public class MarkdownRenderer
             JTextArea emptyText = new JTextArea("(空内容)");
             emptyText.setEditable(false);
             emptyText.setOpaque(false);
-            emptyText.setFont(new Font("Microsoft YaHei", Font.ITALIC, 12));
+            emptyText.setFont(createMixedFont(Font.ITALIC, 12));
             emptyText.setForeground(Color.GRAY);
             return new JScrollPane(emptyText);
         }
@@ -65,7 +65,8 @@ public class MarkdownRenderer
             textPane.setEditable(false);
             textPane.setContentType("text/html");
             textPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
-            textPane.setFont(new Font("Microsoft YaHei", Font.PLAIN, 13));
+            textPane.setFont(createMixedFont(Font.PLAIN, 14));
+            textPane.setBackground(Color.WHITE);
             
             String html = convertMarkdownToHtml(markdown);
             textPane.setText(html);
@@ -77,9 +78,10 @@ public class MarkdownRenderer
             scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
             scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             
+            int preferredHeight = Math.min(textPane.getPreferredSize().height + 20, 2000);
             scrollPane.setPreferredSize(new Dimension(
                 scrollPane.getPreferredSize().width,
-                Math.min(scrollPane.getPreferredSize().height, 400)
+                preferredHeight
             ));
             
             return scrollPane;
@@ -91,15 +93,57 @@ public class MarkdownRenderer
             fallbackArea.setEditable(false);
             fallbackArea.setWrapStyleWord(true);
             fallbackArea.setLineWrap(true);
-            fallbackArea.setFont(new Font("Microsoft YaHei", Font.PLAIN, 13));
+            fallbackArea.setFont(createMixedFont(Font.PLAIN, 14));
             fallbackArea.setOpaque(false);
+            fallbackArea.setBackground(Color.WHITE);
             
             JScrollPane scrollPane = new JScrollPane(fallbackArea);
             scrollPane.setBorder(BorderFactory.createEmptyBorder());
             scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
             scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             
+            int preferredHeight = Math.min(fallbackArea.getPreferredSize().height + 20, 2000);
+            scrollPane.setPreferredSize(new Dimension(
+                scrollPane.getPreferredSize().width,
+                preferredHeight
+            ));
+            
             return scrollPane;
+        }
+    }
+    
+    private Font createMixedFont(int style, int size)
+    {
+        String chineseFont = "Microsoft YaHei";
+        String englishFont = "Monaco";
+        
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        String[] availableFonts = ge.getAvailableFontFamilyNames();
+        
+        boolean hasChinese = false;
+        boolean hasMonaco = false;
+        
+        for (String font : availableFonts)
+        {
+            if (font.equals(chineseFont))
+            {
+                hasChinese = true;
+            }
+            if (font.equals(englishFont))
+            {
+                hasMonaco = true;
+            }
+        }
+        
+        if (hasChinese)
+        {
+            return new Font(chineseFont, style, size);
+        } else if (hasMonaco)
+        {
+            return new Font(englishFont, style, size);
+        } else
+        {
+            return new Font(Font.SANS_SERIF, style, size);
         }
     }
     
@@ -109,15 +153,28 @@ public class MarkdownRenderer
         String html = htmlRenderer.render(document);
         
         return "<html><head><style>" +
-                   "body { font-family: 'Segoe UI', Arial, sans-serif; padding: 10px; line-height: 1.6; }" +
-                   "pre { background-color: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto; }" +
-                   "code { background-color: #f5f5f5; padding: 2px 5px; border-radius: 3px; font-family: 'Consolas', monospace; }" +
-                   "pre code { background-color: transparent; padding: 0; }" +
+                   "body { font-family: 'Microsoft YaHei', 'Segoe UI', Arial, sans-serif; padding: 10px; line-height: 1.8; color: #333; }" +
+                   "h1, h2, h3, h4, h5, h6 { color: #2c3e50; margin-top: 15px; margin-bottom: 10px; }" +
+                   "h1 { font-size: 24px; border-bottom: 2px solid #eee; padding-bottom: 5px; }" +
+                   "h2 { font-size: 20px; border-bottom: 1px solid #eee; padding-bottom: 5px; }" +
+                   "h3 { font-size: 18px; }" +
+                   "p { margin: 8px 0; }" +
+                   "pre { background-color: #f6f8fa; padding: 12px; border-radius: 6px; overflow-x: auto; border: 1px solid #e1e4e8; }" +
+                   "code { background-color: #f6f8fa; padding: 2px 6px; border-radius: 3px; font-family: 'Monaco', 'Consolas', 'Courier New', monospace; font-size: 13px; color: #e83e8c; }" +
+                   "pre code { background-color: transparent; padding: 0; color: #333; }" +
                    "table { border-collapse: collapse; width: 100%; margin: 10px 0; }" +
-                   "th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }" +
-                   "th { background-color: #f0f0f0; }" +
-                   "blockquote { border-left: 4px solid #ddd; padding-left: 10px; margin-left: 0; color: #666; }" +
-                   "img { max-width: 100%; height: auto; }" +
+                   "th, td { border: 1px solid #dfe2e5; padding: 8px 12px; text-align: left; }" +
+                   "th { background-color: #f6f8fa; font-weight: bold; color: #24292e; }" +
+                   "tr:nth-child(even) { background-color: #f9f9f9; }" +
+                   "blockquote { border-left: 4px solid #3b82f6; padding: 8px 12px; margin: 10px 0; background-color: #f0f7ff; color: #555; border-radius: 0 4px 4px 0; }" +
+                   "ul, ol { padding-left: 25px; margin: 8px 0; }" +
+                   "li { margin: 4px 0; }" +
+                   "a { color: #3b82f6; text-decoration: none; }" +
+                   "a:hover { text-decoration: underline; }" +
+                   "strong { color: #1a1a1a; font-weight: bold; }" +
+                   "em { color: #555; font-style: italic; }" +
+                   "hr { border: none; border-top: 2px solid #e1e4e8; margin: 15px 0; }" +
+                   "img { max-width: 100%; height: auto; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }" +
                    "</style></head><body>" + html + "</body></html>";
     }
     
@@ -142,25 +199,42 @@ public class MarkdownRenderer
     {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)),
-            BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
+            BorderFactory.createEmptyBorder(8, 8, 8, 8)));
+        panel.setBackground(new Color(246, 248, 250));
         
         JTextArea codeArea = new JTextArea(code);
         codeArea.setEditable(false);
-        codeArea.setFont(new Font("Consolas", Font.PLAIN, 13));
-        codeArea.setBackground(new Color(245, 245, 245));
+        codeArea.setFont(new Font("Monaco", Font.PLAIN, 13));
+        codeArea.setBackground(new Color(246, 248, 250));
+        codeArea.setForeground(new Color(36, 41, 47));
+        codeArea.setCaretColor(Color.BLACK);
         
         JPanel headerPanel = new JPanel(new BorderLayout());
-        JLabel langLabel = new JLabel(language != null ? language : "code");
-        langLabel.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        headerPanel.setOpaque(false);
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0));
         
-        JButton copyButton = new JButton("Copy");
+        JLabel langLabel = new JLabel(language != null && !language.isEmpty() ? language.toUpperCase() : "CODE");
+        langLabel.setFont(new Font("Microsoft YaHei", Font.BOLD, 11));
+        langLabel.setForeground(new Color(88, 88, 88));
+        
+        JButton copyButton = new JButton("\uD83D\uDCCB 复制");
+        copyButton.setFont(new Font("Microsoft YaHei", Font.PLAIN, 12));
+        copyButton.setBackground(new Color(66, 133, 244));
+        copyButton.setForeground(Color.WHITE);
+        copyButton.setBorder(BorderFactory.createEmptyBorder(5, 12, 5, 12));
+        copyButton.setFocusPainted(false);
+        copyButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         copyButton.addActionListener(e ->
         {
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             clipboard.setContents(new StringSelection(code), null);
-            copyButton.setText("Copied!");
-            Timer timer = new Timer(2000, evt -> copyButton.setText("Copy"));
+            copyButton.setText("\u2705 已复制");
+            copyButton.setBackground(new Color(52, 168, 83));
+            Timer timer = new Timer(2000, evt -> {
+                copyButton.setText("\uD83D\uDCCB 复制");
+                copyButton.setBackground(new Color(66, 133, 244));
+            });
             timer.setRepeats(false);
             timer.start();
         });
