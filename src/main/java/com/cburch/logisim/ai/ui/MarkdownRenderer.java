@@ -22,6 +22,7 @@ import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 
 import javax.swing.*;
+import javax.swing.text.JTextComponent;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
@@ -29,6 +30,9 @@ import javax.swing.text.StyledDocument;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.Arrays;
 
 public class MarkdownRenderer
@@ -67,11 +71,16 @@ public class MarkdownRenderer
             textPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
             textPane.setFont(createMixedFont(Font.PLAIN, 14));
             textPane.setBackground(Color.WHITE);
+            textPane.setFocusable(true);
+            textPane.setSelectionColor(new Color(66, 133, 244, 80));
+            textPane.setSelectedTextColor(Color.BLACK);
             
             String html = convertMarkdownToHtml(markdown);
             textPane.setText(html);
             
             textPane.setCaretPosition(0);
+            
+            enableTextSelectionAndCopy(textPane);
             
             JScrollPane scrollPane = new JScrollPane(textPane);
             scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -96,6 +105,11 @@ public class MarkdownRenderer
             fallbackArea.setFont(createMixedFont(Font.PLAIN, 14));
             fallbackArea.setOpaque(false);
             fallbackArea.setBackground(Color.WHITE);
+            fallbackArea.setFocusable(true);
+            fallbackArea.setSelectionColor(new Color(66, 133, 244, 80));
+            fallbackArea.setSelectedTextColor(Color.BLACK);
+            
+            enableTextSelectionAndCopy(fallbackArea);
             
             JScrollPane scrollPane = new JScrollPane(fallbackArea);
             scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -193,6 +207,81 @@ public class MarkdownRenderer
         Style codeStyle = context.addStyle("code", defaultStyle);
         StyleConstants.setFontFamily(codeStyle, "Consolas");
         StyleConstants.setBackground(codeStyle, new Color(245, 245, 245));
+    }
+    
+    private void enableTextSelectionAndCopy(JTextComponent textComponent)
+    {
+        final Timer[] longPressTimer = {null};
+        final Point[] pressPoint = {null};
+        
+        textComponent.addMouseListener(new MouseAdapter()
+        {
+            @Override
+            public void mousePressed(MouseEvent e)
+            {
+                pressPoint[0] = e.getPoint();
+                
+                longPressTimer[0] = new Timer(500, event ->
+                {
+                    if (pressPoint[0] != null && textComponent.contains(pressPoint[0]))
+                    {
+                        textComponent.requestFocusInWindow();
+                        int pos = textComponent.viewToModel2D(pressPoint[0]);
+                        if (pos >= 0 && pos <= textComponent.getDocument().getLength())
+                        {
+                            textComponent.setCaretPosition(pos);
+                        }
+                    }
+                });
+                longPressTimer[0].setRepeats(false);
+                longPressTimer[0].start();
+            }
+            
+            @Override
+            public void mouseReleased(MouseEvent e)
+            {
+                if (longPressTimer[0] != null && longPressTimer[0].isRunning())
+                {
+                    longPressTimer[0].stop();
+                }
+            }
+            
+            @Override
+            public void mouseClicked(MouseEvent e)
+            {
+                if (longPressTimer[0] != null && longPressTimer[0].isRunning())
+                {
+                    longPressTimer[0].stop();
+                }
+            }
+        });
+        
+        textComponent.addMouseMotionListener(new MouseMotionAdapter()
+        {
+            @Override
+            public void mouseDragged(MouseEvent e)
+            {
+                if (longPressTimer[0] != null && longPressTimer[0].isRunning())
+                {
+                    longPressTimer[0].stop();
+                }
+            }
+        });
+        
+        textComponent.getInputMap().put(KeyStroke.getKeyStroke("control C"), "copyAction");
+        textComponent.getActionMap().put("copyAction", new AbstractAction()
+        {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e)
+            {
+                String selectedText = textComponent.getSelectedText();
+                if (selectedText != null && !selectedText.isEmpty())
+                {
+                    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                    clipboard.setContents(new StringSelection(selectedText), null);
+                }
+            }
+        });
     }
     
     public static JPanel createCodeBlockWithCopy(String code, String language)

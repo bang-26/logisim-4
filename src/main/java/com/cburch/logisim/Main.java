@@ -36,9 +36,9 @@ public class Main {
     // To print debug log level information, run with:
     //    java -Dorg.slf4j.simpleLogger.defaultLogLevel=debug
     // or uncomment next line
-    // System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "debug");
-
+    System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "info");
     System.setProperty("apple.awt.application.name", BuildInfo.name);
+    
     try {
       if (!GraphicsEnvironment.isHeadless()) {
         FlatLightLaf.installLafInfo();

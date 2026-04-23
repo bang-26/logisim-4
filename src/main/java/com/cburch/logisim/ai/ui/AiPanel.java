@@ -8,7 +8,10 @@ import com.cburch.logisim.ai.service.AiServiceImpl;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.InputMethodEvent;
 import java.awt.event.InputMethodListener;
 import java.awt.event.KeyAdapter;
@@ -66,6 +69,8 @@ public class AiPanel extends JPanel
         messageList.setBackground(new Color(250, 250, 250));
         messageList.setFixedCellWidth(-1);
         messageList.setFixedCellHeight(-1);
+        
+        enableGlobalCopyForMessageList();
         
         JScrollPane scrollPane = new JScrollPane(messageList);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -536,6 +541,52 @@ public class AiPanel extends JPanel
         {
             messageList.ensureIndexIsVisible(messageListModel.getSize() - 1);
         });
+    }
+    
+    private void enableGlobalCopyForMessageList()
+    {
+        messageList.setFocusable(true);
+        
+        messageList.getInputMap().put(KeyStroke.getKeyStroke("control C"), "copyAction");
+        messageList.getActionMap().put("copyAction", new AbstractAction()
+        {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e)
+            {
+                copySelectedText();
+            }
+        });
+    }
+    
+    private void copySelectedText()
+    {
+        Component focusedComponent = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+        
+        if (focusedComponent instanceof JTextComponent)
+        {
+            JTextComponent textComponent = (JTextComponent) focusedComponent;
+            String selectedText = textComponent.getSelectedText();
+            
+            if (selectedText != null && !selectedText.isEmpty())
+            {
+                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                clipboard.setContents(new StringSelection(selectedText), null);
+                return;
+            }
+        }
+        
+        int selectedIndex = messageList.getSelectedIndex();
+        if (selectedIndex >= 0 && selectedIndex < chatHistory.size())
+        {
+            ChatMessage selectedMessage = chatHistory.get(selectedIndex);
+            String content = selectedMessage.getContent();
+            
+            if (content != null && !content.isEmpty())
+            {
+                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                clipboard.setContents(new StringSelection(content), null);
+            }
+        }
     }
     
     private class MessageCellRenderer implements ListCellRenderer<ChatMessage>
