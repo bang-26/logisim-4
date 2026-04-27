@@ -1,32 +1,22 @@
-/*
- * Logisim-evolution - digital logic design tool and simulator
- * Copyright by the Logisim-evolution developers
- *
- * https://github.com/logisim-evolution/
- *
- * This is free software released under GNU GPLv3 license
- */
-
 package com.cburch.logisim.gui.menu;
-
-import static com.cburch.logisim.gui.Strings.S;
 
 import com.cburch.logisim.generated.BuildInfo;
 import com.cburch.logisim.gui.generic.LFrame;
 import com.cburch.logisim.gui.generic.OptionPane;
 import com.cburch.logisim.gui.start.About;
+import com.cburch.logisim.gui.web.WebBrowserPanel;
 import com.cburch.logisim.util.MacCompatibility;
-import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.Toolkit;
+
+import javax.help.HelpSet;
+import javax.help.JHelp;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
 import java.util.Locale;
-import javax.help.HelpSet;
-import javax.help.JHelp;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
+
+import static com.cburch.logisim.gui.Strings.S;
 
 class MenuHelp extends JMenu implements ActionListener {
 
@@ -37,6 +27,7 @@ class MenuHelp extends JMenu implements ActionListener {
   private final JMenuItem library = new JMenuItem();
   private final JMenuItem about = new JMenuItem();
   private final JMenuItem www = new JMenuItem();
+  private final JMenuItem aiAssistant = new JMenuItem();
   private HelpSet helpSet;
   private String helpSetUrl = "";
   private JHelp helpComponent;
@@ -50,6 +41,7 @@ class MenuHelp extends JMenu implements ActionListener {
     library.addActionListener(this);
     about.addActionListener(this);
     www.addActionListener(this);
+    aiAssistant.addActionListener(this);
 
     add(tutorial);
     add(guide);
@@ -57,6 +49,7 @@ class MenuHelp extends JMenu implements ActionListener {
     if (browserIntegrationSupported()) {
       addSeparator();
       add(www);
+      add(aiAssistant);
     }
     if (!MacCompatibility.isAboutAutomaticallyPresent()) {
       addSeparator();
@@ -77,6 +70,8 @@ class MenuHelp extends JMenu implements ActionListener {
       About.showAboutDialog(menubar.getParentFrame());
     } else if (www.equals(src)) {
       openProjectWebsite();
+    } else if (aiAssistant.equals(src)) {
+      openAiAssistant();
     }
   }
 
@@ -85,6 +80,7 @@ class MenuHelp extends JMenu implements ActionListener {
     tutorial.setEnabled(false);
     library.setEnabled(false);
     www.setEnabled(false);
+    aiAssistant.setEnabled(false);
   }
 
   private void loadBroker() {
@@ -143,6 +139,21 @@ class MenuHelp extends JMenu implements ActionListener {
     }
   }
 
+  public void openAiAssistant() {
+    try {
+      // Create and show the web browser panel with Tongyi Qianwen homepage
+      WebBrowserPanel browserPanel = new WebBrowserPanel(
+          "https://tongyi.aliyun.com/qianwen/", 
+          S.get("helpAiAssistantTitle")
+      );
+      browserPanel.show();
+    } catch (Exception e) {
+      e.printStackTrace();
+      OptionPane.showMessageDialog(menubar.getParentFrame(), 
+          S.get("helpAiAssistantError"));
+    }
+  }
+
   public void localeChanged() {
     this.setText(S.get("helpMenu"));
     if (helpFrame != null) {
@@ -153,6 +164,7 @@ class MenuHelp extends JMenu implements ActionListener {
     library.setText(S.get("helpLibraryItem"));
     about.setText(S.get("helpAboutItem"));
     www.setText(S.get("helpProjectWebsite"));
+    aiAssistant.setText(S.get("helpAiAssistant"));
     if (helpFrame != null) {
       helpFrame.setLocale(Locale.getDefault());
       loadBroker();

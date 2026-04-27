@@ -62,6 +62,7 @@
         <junit.version>6.0.3</junit.version>
         <mockito.version>5.23.0</mockito.version>
         <lombok.version>1.18.30</lombok.version>
+        <javafx.version>21.0.2</javafx.version>
         
         <!-- Plugin versions -->
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
@@ -181,6 +182,23 @@
             <groupId>org.commonmark</groupId>
             <artifactId>commonmark-ext-gfm-tables</artifactId>
             <version>0.21.0</version>
+        </dependency>
+
+        <!-- JavaFX dependencies for web browsing -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>${javafx.version}</version>
         </dependency>
 
         <!-- Test dependencies -->

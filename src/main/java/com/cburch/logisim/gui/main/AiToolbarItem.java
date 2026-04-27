@@ -87,7 +87,7 @@ public class AiToolbarItem implements ToolbarClickableItem
         g2d.setColor(destination.getForeground());
         g2d.setFont(new Font("Microsoft YaHei", Font.PLAIN, 12));
         FontMetrics fm = g2d.getFontMetrics();
-        String text = "AI";
+        String text = "AI助手";
         int textX = (width - fm.stringWidth(text)) / 2;
         int textY = height - 6;
         g2d.drawString(text, textX, textY);
