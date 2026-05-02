@@ -9,27 +9,28 @@
 
 package com.cburch.logisim.std.hdl;
 
-import static com.cburch.logisim.vhdl.Strings.S;
-
 import com.cburch.hdl.HdlModel;
 import com.cburch.logisim.gui.generic.OptionPane;
 import com.cburch.logisim.util.Softwares;
-import java.awt.Dimension;
-import java.awt.Insets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+
+import static com.cburch.logisim.vhdl.Strings.S;
 
 /**
  * VhdlContentComponent connects the VHDL interface parser with other code.
  * (The parsed VHDL interface is then used for the ports of a VHDL entity component.)
  */
 public class VhdlContentComponent extends HdlContent {
+
+  private static final Logger logger = LoggerFactory.getLogger(VhdlContentComponent.class);
 
   /**
    * Creates a new VhdlContentComponent.
@@ -58,7 +59,7 @@ public class VhdlContentComponent extends HdlContent {
           input.close();
         }
       } catch (IOException ex) {
-        Logger.getLogger(VhdlContentComponent.class.getName()).log(Level.SEVERE, null, ex);
+        logger.error("Failed to close input stream", ex);
       }
     }
 

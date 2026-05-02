@@ -9,21 +9,24 @@
 
 package com.cburch.logisim.std.hdl;
 
-import static com.cburch.logisim.vhdl.Strings.S;
-
 import com.cburch.hdl.HdlModel;
 import com.cburch.logisim.gui.generic.OptionPane;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import static com.cburch.logisim.vhdl.Strings.S;
 
 /**
  * BlifContentComponent connects the BLIF parser with the rest of the HDL content code.
  */
 public class BlifContentComponent extends HdlContent {
+
+  private static final Logger logger = LoggerFactory.getLogger(BlifContentComponent.class);
 
   public static BlifContentComponent create() {
     return new BlifContentComponent();
@@ -49,7 +52,7 @@ public class BlifContentComponent extends HdlContent {
           input.close();
         }
       } catch (IOException ex) {
-        Logger.getLogger(BlifContentComponent.class.getName()).log(Level.SEVERE, null, ex);
+        logger.error("Failed to close input stream", ex);
       }
     }
 

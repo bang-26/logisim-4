@@ -135,7 +135,6 @@ public class DefaultEvolutionAppearance {
       int ldy,
       boolean isFixedSize) {
     int hAlign;
-    final var color = Color.DARK_GRAY;
     int ldX;
     for (final var pin : pins) {
       final var offset =
@@ -180,11 +179,13 @@ public class DefaultEvolutionAppearance {
         }
         int textX = x + ldX;
         if (isClockPin) {
-          // Adjust by width of clock symbol
           textX += 8;
         }
         final var textLabel = new Text(textX, y + ldy, label);
         textLabel.getLabel().setHorizontalAlignment(hAlign);
+        final var color = (pin.getAttributeValue(Pin.ATTR_TYPE) == Pin.OUTPUT) 
+            ? new Color(139, 0, 0) 
+            : Color.BLUE;
         textLabel.getLabel().setColor(color);
         textLabel.getLabel().setFont(DrawAttr.DEFAULT_FIXED_PICH_FONT);
         dest.add(textLabel);

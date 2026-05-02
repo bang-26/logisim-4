@@ -9,16 +9,16 @@
 
 package com.cburch.logisim.instance;
 
-import static com.cburch.logisim.std.Strings.S;
-
 import com.cburch.logisim.data.Attribute;
 import com.cburch.logisim.data.AttributeOption;
 import com.cburch.logisim.data.Attributes;
 import com.cburch.logisim.data.BitWidth;
 import com.cburch.logisim.data.Direction;
 import com.cburch.logisim.fpga.data.ComponentMapInformationContainer;
-import java.awt.Color;
-import java.awt.Font;
+
+import java.awt.*;
+
+import static com.cburch.logisim.std.Strings.S;
 
 public interface StdAttr {
   Attribute<Direction> FACING = Attributes.forDirection("facing", S.getter("stdFacingAttr"));
@@ -42,7 +42,7 @@ public interface StdAttr {
 
   Attribute<String> LABEL = Attributes.forString("label", S.getter("stdLabelAttr"));
   Attribute<Font> LABEL_FONT = Attributes.forFont("labelfont", S.getter("stdLabelFontAttr"));
-  Font DEFAULT_LABEL_FONT = new Font("SansSerif", Font.BOLD, 16);
+  Font DEFAULT_LABEL_FONT = new Font("Microsoft YaHei", Font.PLAIN, 16);
   Attribute<Color> LABEL_COLOR = Attributes.forColor("labelcolor", S.getter("ioLabelColorAttr"));
   Color DEFAULT_LABEL_COLOR = Color.BLUE;
   AttributeOption LABEL_CENTER =

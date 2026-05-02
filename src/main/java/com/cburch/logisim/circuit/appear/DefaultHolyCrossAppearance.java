@@ -204,7 +204,6 @@ public class DefaultHolyCrossAppearance {
       int dy,
       boolean isLeftSide) {
     int hAlign;
-    final var color = Color.DARK_GRAY; // maybe GRAY instead?
     int ldx;
     for (final var pin : pins) {
       dest.add(new AppearancePort(Location.create(x, y, true), pin));
@@ -221,6 +220,9 @@ public class DefaultHolyCrossAppearance {
           final var label = new Text(x + ldx, y, text);
           label.getLabel().setHorizontalAlignment(hAlign);
           label.getLabel().setVerticalAlignment(EditableLabel.MIDDLE);
+          final var color = (pin.getAttributeValue(Pin.ATTR_TYPE) == Pin.OUTPUT) 
+              ? new Color(139, 0, 0) 
+              : Color.BLUE;
           label.getLabel().setColor(color);
           final var pinFont = label.getLabel().getFont().deriveFont((float) 10);
           label.getLabel().setFont(pinFont);

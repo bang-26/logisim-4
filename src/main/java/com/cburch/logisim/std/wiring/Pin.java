@@ -9,8 +9,6 @@
 
 package com.cburch.logisim.std.wiring;
 
-import static com.cburch.logisim.std.Strings.S;
-
 import com.cburch.contracts.BaseDocumentListenerContract;
 import com.cburch.contracts.BaseKeyListenerContract;
 import com.cburch.contracts.BaseWindowFocusListenerContract;
@@ -46,25 +44,17 @@ import com.cburch.logisim.tools.key.JoinedConfigurator;
 import com.cburch.logisim.util.GraphicsUtil;
 import com.cburch.logisim.util.LocaleListener;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.font.TextLayout;
 import java.math.BigInteger;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFormattedTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+
+import static com.cburch.logisim.std.Strings.S;
 
 public class Pin extends InstanceFactory {
   /**
@@ -720,7 +710,7 @@ public class Pin extends InstanceFactory {
 
   public static final Pin FACTORY = new Pin();
   private static final Font ICON_WIDTH_FONT = new Font("SansSerif", Font.BOLD, 9);
-  public static final Font DEFAULT_FONT = new Font("monospaced", Font.PLAIN, 12);
+  public static final Font DEFAULT_FONT = new Font("Microsoft YaHei", Font.PLAIN, 12);
   private static final Color ICON_WIDTH_COLOR = Value.widthErrorColor.darker();
   public static final int DIGIT_WIDTH = 8;
 

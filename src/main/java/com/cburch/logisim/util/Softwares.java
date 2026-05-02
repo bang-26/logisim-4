@@ -9,22 +9,25 @@
 
 package com.cburch.logisim.util;
 
-import static com.cburch.logisim.util.Strings.S;
-
 import com.cburch.logisim.gui.generic.OptionPane;
 import com.cburch.logisim.prefs.AppPreferences;
-import java.awt.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JFileChooser;
+
+import static com.cburch.logisim.util.Strings.S;
 
 public final class Softwares {
+
+  private static final Logger logger = LoggerFactory.getLogger(Softwares.class);
 
   public static final String QUESTA = "questaSim";
   public static final String[] QUESTA_BIN = loadQuesta();
@@ -72,7 +75,7 @@ public final class Softwares {
       try {
         if (reader != null) reader.close();
       } catch (IOException ex) {
-        Logger.getLogger(Softwares.class.getName()).log(Level.SEVERE, null, ex);
+        logger.error("Failed to close reader", ex);
       }
     }
   }
@@ -225,7 +228,7 @@ public final class Softwares {
         if (tmp != null) tmp.deleteOnExit();
         if (reader != null) reader.close();
       } catch (IOException ex) {
-        Logger.getLogger(Softwares.class.getName()).log(Level.SEVERE, null, ex);
+        logger.error("Failed to close reader in validateVhdl", ex);
       }
     }
 
